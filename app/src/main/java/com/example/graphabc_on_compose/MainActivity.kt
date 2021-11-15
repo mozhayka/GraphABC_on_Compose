@@ -30,9 +30,7 @@ import androidx.compose.material.Text
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.PaintingStyle.Companion.Stroke
 import androidx.compose.ui.tooling.preview.Preview
 import kotlin.random.Random
 
@@ -323,8 +321,20 @@ fun DrawCircle(color: Color, center_x: Float, center_y: Float, r: Float)
     }
 }
 
+@Composable
+fun DrawRect(color: Color, topLeft_x: Float, topLeft_y: Float, size: Size)
+{
+    Canvas(modifier = Modifier.fillMaxSize()) {
+        drawRect(color, topLeft = Offset(topLeft_x, topLeft_y), size = size)
+    }
+}
+
 @Preview(showBackground = true)
 @Composable
 fun CircleExample() {
     DrawCircle(color = Color.Blue, center_x = 100.5f, center_y = 120.7f, r = 40f)
+    DrawCircle(color = Color.Red, center_x = 80.5f, center_y = 120f, r = 40f)
+    DrawRect(color = Color.Gray, topLeft_x = 80.5f, topLeft_y = 120f, size = Size(40f, 60f))
+    DrawRect(color = Color.Black, topLeft_x = 140.5f, topLeft_y = 200f, size = Size(40f, 60f))
 }
+
