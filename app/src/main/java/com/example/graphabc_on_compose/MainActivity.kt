@@ -3,6 +3,7 @@ package com.example.graphabc_on_compose
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -27,7 +28,11 @@ import androidx.compose.material.Button
 import androidx.compose.material.Slider
 import androidx.compose.material.Text
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.PaintingStyle.Companion.Stroke
 import androidx.compose.ui.tooling.preview.Preview
 import kotlin.random.Random
 
@@ -69,8 +74,6 @@ fun MessageCard(msg: Message) {
     }
 }
 
-
-
 @Preview
 @Composable
 fun PreviewMessageCard() {
@@ -78,7 +81,6 @@ fun PreviewMessageCard() {
         msg = Message("Colleague", "Hey, take a look at Jetpack Compose, it's great!")
     )
 }
-
 
 
 class Game {
@@ -235,5 +237,80 @@ data class PieceData(val game: Game, val velocity: Float, val color: Color) {
             clicked = true
             game.clicked(this)
         }
+    }
+}
+
+//@Composable
+//fun SmileyFaceCanvas(
+//    modifier: Modifier
+//) {
+//    Canvas(
+//        modifier = modifier.size(300.dp),
+//        onDraw = {
+//            // Head
+//            drawCircle(
+//                Brush.linearGradient(
+//                    colors = listOf(greenLight700, green700)
+//                ),
+//                radius = size.width / 2,
+//                center = center,
+//                style = Stroke(width = size.width * 0.075f)
+//            )
+//
+//            // Smile
+//            val smilePadding = size.width * 0.15f
+//            drawArc(
+//                color = red700,
+//                startAngle = 0f,
+//                sweepAngle = 180f,
+//                useCenter = true,
+//                topLeft = Offset(smilePadding, smilePadding),
+//                size = Size(size.width - (smilePadding * 2f), size.height - (smilePadding * 2f))
+//            )
+//
+//            // Left eye
+//            drawRect(
+//                color = dark,
+//                topLeft = Offset(size.width * 0.25f, size.height / 4),
+//                size = Size(smilePadding, smilePadding)
+//            )
+//
+//            // Right eye
+//            drawRect(
+//                color = dark,
+//                topLeft = Offset((size.width * 0.75f) - smilePadding, size.height / 4),
+//                size = Size(smilePadding, smilePadding)
+//            )
+//        }
+//    )
+//}
+//
+//@Composable
+//fun DrawCircle()
+//{
+//    ctx.beginPath ();
+//    ctx.arc (100, 50, 15, 0, Math.PI * 2, false);
+//    ctx.stoke ();
+//}
+
+@Preview(showBackground = true)
+@Composable
+fun CanvasDrawExample() {
+    Canvas(modifier = Modifier.fillMaxSize()) {
+        drawRect(Color.Blue, topLeft = Offset(0f, 0f), size = Size(this.size.width, 55f))
+        drawCircle(Color.Red, center = Offset(50f, 200f), radius = 40f)
+        drawLine(
+            Color.Green, Offset(20f, 0f),
+            Offset(200f, 200f), strokeWidth = 5f
+        )
+
+        drawArc(
+            Color.Black,
+            0f,
+            60f,
+            useCenter = true,
+            size = Size(300f, 300f),
+            topLeft = Offset(60f, 60f)
+        )
     }
 }
