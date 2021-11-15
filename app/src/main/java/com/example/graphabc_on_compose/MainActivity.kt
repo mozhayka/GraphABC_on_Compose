@@ -314,3 +314,17 @@ fun CanvasDrawExample() {
         )
     }
 }
+
+@Composable
+fun DrawCircle(color: Color, center_x: Float, center_y: Float, r: Float)
+{
+    Canvas(modifier = Modifier.fillMaxSize()) {
+        drawCircle(color, center = Offset(center_x, center_y), radius = r)
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun CircleExample() {
+    DrawCircle(color = Color.Blue, center_x = 100.5f, center_y = 120.7f, r = 40f)
+}
