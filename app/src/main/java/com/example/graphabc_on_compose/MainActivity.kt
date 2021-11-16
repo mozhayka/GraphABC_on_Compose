@@ -72,7 +72,7 @@ fun MessageCard(msg: Message) {
     }
 }
 
-@Preview
+//@Preview
 @Composable
 fun PreviewMessageCard() {
     MessageCard(
@@ -81,217 +81,7 @@ fun PreviewMessageCard() {
 }
 
 
-class Game {
-    private var previousTimeNanos: Long = Long.MAX_VALUE
-    private val colors = arrayOf(
-        Color.Red, Color.Blue, Color.Cyan,
-        Color.Magenta, Color.Yellow, Color.Black
-    )
-    private var startTime = 0L
-
-    var size by mutableStateOf(Pair(0.dp, 0.dp))
-
-    var pieces = mutableStateListOf<PieceData>()
-        private set
-
-    var elapsed by mutableStateOf(0L)
-    var score by mutableStateOf(0)
-    private var clicked by mutableStateOf(0)
-
-    var started by mutableStateOf(false)
-    var paused by mutableStateOf(false)
-    var finished by mutableStateOf(false)
-
-    var numBlocks by mutableStateOf(5)
-
-    fun start() {
-        previousTimeNanos = System.nanoTime()
-        startTime = previousTimeNanos
-        clicked = 0
-        started = true
-        finished = false
-        paused = false
-        pieces.clear()
-        repeat(numBlocks) { index ->
-            pieces.add(PieceData(this, index * 1.5f + 5f, colors[index % colors.size]).also { piece ->
-                piece.position = Random.nextDouble(0.0, 100.0).toFloat()
-            })
-        }
-    }
-
-    fun togglePause() {
-        paused = !paused
-        previousTimeNanos = System.nanoTime()
-    }
-
-    fun update(nanos: Long) {
-        val dt = (nanos - previousTimeNanos).coerceAtLeast(0)
-        previousTimeNanos = nanos
-        elapsed = nanos - startTime
-        pieces.forEach { it.update(dt) }
-    }
-
-    fun clicked(piece: PieceData) {
-        score += piece.velocity.toInt()
-        clicked++
-        if (clicked == numBlocks) {
-            finished = true
-        }
-    }
-}
-
-@Composable
-@Preview
-fun FallingBallsGame() {
-    val game = remember { Game() }
-    val density = LocalDensity.current
-    Column {
-        Text(
-            "Catch balls!${if (game.finished) " Game over!" else ""}",
-            fontSize = 50.sp,
-            color = Color(218, 120, 91)
-        )
-        Text("Score ${game.score} Time ${game.elapsed / 1_000_000} Blocks ${game.numBlocks}", fontSize = 35.sp)
-        Row {
-            if (!game.started) {
-                Slider(
-                    value = game.numBlocks / 20f,
-                    onValueChange = { game.numBlocks = (it * 20f).toInt().coerceAtLeast(1) },
-                    modifier = Modifier.width(100.dp)
-                )
-            }
-            Button(onClick = {
-                game.started = !game.started
-                if (game.started) {
-                    game.start()
-                }
-            }) {
-                Text(if (game.started) "Stop" else "Start", fontSize = 40.sp)
-            }
-            if (game.started) {
-                Spacer(Modifier.padding(5.dp))
-                Button(onClick = {
-                    game.togglePause()
-                }) {
-                    Text(if (game.paused) "Resume" else "Pause", fontSize = 40.sp)
-                }
-            }
-        }
-        if (game.started) {
-            Box(modifier = Modifier
-                .fillMaxWidth()
-                .fillMaxHeight()
-                .onSizeChanged {
-                    with(density) {
-                        game.size = it.width.toDp() to it.height.toDp()
-                    }
-                }
-            ) {
-                game.pieces.forEachIndexed { index, piece -> Piece(index, piece) }
-            }
-        }
-
-        LaunchedEffect(Unit) {
-            while (true) {
-                withFrameNanos {
-                    if (game.started && !game.paused && !game.finished)
-                        game.update(it)
-                }
-            }
-        }
-    }
-}
-
-@Composable
-fun Piece(index: Int, piece: PieceData) {
-    val boxSize = 40.dp
-    Box(
-        Modifier
-            .offset(boxSize * index * 5 / 3, piece.position.dp)
-            .shadow(30.dp)
-            .clip(CircleShape)
-    ) {
-        Box(
-            Modifier
-                .size(boxSize, boxSize)
-                .background(if (piece.clicked) Color.Gray else piece.color)
-                .clickable(onClick = { piece.click() })
-        )
-    }
-}
-
-data class PieceData(val game: Game, val velocity: Float, val color: Color) {
-    var clicked by mutableStateOf(false)
-    var position by mutableStateOf(0f)
-
-    fun update(dt: Long) {
-        if (clicked) return
-        val delta = (dt / 1E8 * velocity).toFloat()
-        position = if (position < game.size.second.value) position + delta else 0f
-    }
-
-    fun click() {
-        if (!clicked && !game.paused) {
-            clicked = true
-            game.clicked(this)
-        }
-    }
-}
-
-//@Composable
-//fun SmileyFaceCanvas(
-//    modifier: Modifier
-//) {
-//    Canvas(
-//        modifier = modifier.size(300.dp),
-//        onDraw = {
-//            // Head
-//            drawCircle(
-//                Brush.linearGradient(
-//                    colors = listOf(greenLight700, green700)
-//                ),
-//                radius = size.width / 2,
-//                center = center,
-//                style = Stroke(width = size.width * 0.075f)
-//            )
-//
-//            // Smile
-//            val smilePadding = size.width * 0.15f
-//            drawArc(
-//                color = red700,
-//                startAngle = 0f,
-//                sweepAngle = 180f,
-//                useCenter = true,
-//                topLeft = Offset(smilePadding, smilePadding),
-//                size = Size(size.width - (smilePadding * 2f), size.height - (smilePadding * 2f))
-//            )
-//
-//            // Left eye
-//            drawRect(
-//                color = dark,
-//                topLeft = Offset(size.width * 0.25f, size.height / 4),
-//                size = Size(smilePadding, smilePadding)
-//            )
-//
-//            // Right eye
-//            drawRect(
-//                color = dark,
-//                topLeft = Offset((size.width * 0.75f) - smilePadding, size.height / 4),
-//                size = Size(smilePadding, smilePadding)
-//            )
-//        }
-//    )
-//}
-//
-//@Composable
-//fun DrawCircle()
-//{
-//    ctx.beginPath ();
-//    ctx.arc (100, 50, 15, 0, Math.PI * 2, false);
-//    ctx.stoke ();
-//}
-
-@Preview(showBackground = true)
+//@Preview(showBackground = true)
 @Composable
 fun CanvasDrawExample() {
     Canvas(modifier = Modifier.fillMaxSize()) {
@@ -310,6 +100,33 @@ fun CanvasDrawExample() {
             size = Size(300f, 300f),
             topLeft = Offset(60f, 60f)
         )
+    }
+}
+
+class Person(_name: String){
+    val name: String
+    init{
+        name = _name
+    }
+}
+
+//class Circle(color: Color, center_x: Float, center_y: Float, r: Float) {
+//    init{
+//        Canvas(modifier = Modifier.fillMaxSize()) {
+//            drawCircle(color, center = Offset(center_x, center_y), radius = r)
+//        }
+//        DrawCircle(color, center_x, center_y, r)
+//    }
+//}
+
+class Circle(private val color: Color, private val center_x: Float, private val center_y: Float, private val r: Float) : ComponentActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContent {
+            Canvas(modifier = Modifier.fillMaxSize()) {
+                drawCircle(color, center = Offset(center_x, center_y), radius = r)
+            }
+        }
     }
 }
 
@@ -335,6 +152,7 @@ fun CircleExample() {
     DrawCircle(color = Color.Blue, center_x = 100.5f, center_y = 120.7f, r = 40f)
     DrawCircle(color = Color.Red, center_x = 80.5f, center_y = 120f, r = 40f)
     DrawRect(color = Color.Gray, topLeft_x = 80.5f, topLeft_y = 120f, size = Size(40f, 60f))
-    DrawRect(color = Color.Black, topLeft_x = 140.5f, topLeft_y = 200f, size = Size(40f, 60f))
+    DrawRect(color = Color.Black, topLeft_x = 240.5f, topLeft_y = 200f, size = Size(80f, 200f))
+    //val circle = Circle(color = Color.Red, center_x = 180.5f, center_y = 220f, r = 40f)
 }
 
